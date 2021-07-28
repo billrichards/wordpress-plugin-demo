@@ -139,9 +139,9 @@ class SiteStats {
         $this->html .= '<dt>';
         $this->html .= sprintf( _n( "%s plugin installed:", "%s plugins installed:", $pluginCount), number_format_i18n( $pluginCount ));
         $this->html .= '</dt>';
-        foreach ($plugins as $file => $pluginInfo) {
-            $this->html .= "<dd>{$pluginInfo['Name']}</dd>";
-        }
+        $this->html .= '<dd>';
+        $this->html .= implode(', ', array_map( function($plugin) {return $plugin['Name']; }, $plugins));
+        $this->html .= '</dd>';
     }
 
     /**
@@ -155,9 +155,9 @@ class SiteStats {
         $this->html .= '<dt>';
         $this->html .= sprintf( _n( "%s theme installed:", "%s themes installed:", $themeCount), number_format_i18n( $themeCount ));
         $this->html .= '</dt>';
-        foreach ($themes as $theme => $wpThemeObject) {
-            $this->html .= "<dd>$theme</dd>";
-        }
+        $this->html .= '<dd>';
+        $this->html .= implode(', ', array_keys($themes));
+        $this->html .= '</dd>';
     }
 
     /**
@@ -171,9 +171,9 @@ class SiteStats {
         $this->html .= '<dt>';
         $this->html .= sprintf( _n( "%s term:", "%s terms:", $termCount), number_format_i18n( $termCount ));
         $this->html .= '</dt>';
-        foreach ($terms as $row) {
-            $this->html .= "<dd>{$row->name}</dd>";
-        }
+        $this->html .= '<dd>';
+        $this->html .= implode(', ', array_map( function($row) {return $row->name; }, $terms));
+        $this->html .= '</dd>';
     }
 
 }

@@ -7,9 +7,7 @@ Write a WordPress plugin that:
 (3) has some basic interaction with the WordPress database. 
  */
 /** 
-
 Plugin Name: Site Stats Demo
-Plugin URI: 
 Description: Demo plugin that displays site stat information
 Version: 1.0.0
 Requires at least: 5.8
@@ -18,8 +16,8 @@ Author: Bill Richards
 Author URI: https://github.com/billrichards
 License: GPLv2
 
-
 */
+
 require __DIR__ . '/SiteStats/SiteStats.php';
 global $wpdb;
 // instantiate the SiteStats object

@@ -1,3 +1,7 @@
 #site-stats-demo {
     display: none;
 }
+
+#site-stats-demo dt {
+    font-weight:bold;
+}
