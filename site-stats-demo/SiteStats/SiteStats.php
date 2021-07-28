@@ -101,7 +101,7 @@ class SiteStats {
                 }
             } else {
                 $this->html .= '<dd>';
-                $this->html .= sprintf( _n( "%s $key user", "%s $key users", $count), number_format_i18n( $userInfo ));
+                $this->html .= sprintf( _n( "%s $key user", "%s $key users", $userInfo), number_format_i18n( $userInfo ));
                 $this->html .= '</dd>';
             }
         }
