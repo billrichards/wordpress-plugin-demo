@@ -8,6 +8,7 @@ Write a WordPress plugin that:
  */
 /** 
 Plugin Name: Site Stats Demo
+Plugin URI: https://github.com/billrichards/wordpress-plugin-demo
 Description: Demo plugin that displays site stat information
 Version: 1.0.0
 Requires at least: 5.8
