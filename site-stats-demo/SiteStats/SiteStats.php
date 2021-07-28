@@ -3,41 +3,121 @@ namespace SiteStats;
 
 class SiteStats {
 
-    public static function siteStatsDemo()
+    protected $wpdb; /** @var \wpdb WordPress Database object */
+    protected $html = ''; /** @var string Formatted html to output */
+
+    /**
+     * @param \wpdb $wpdb WordPress Database object
+     */
+    public function __construct(\wpdb $wpdb)
     {
-       echo self::getStats();
+        $this->wpdb = $wpdb;
     }
 
-    private static function getStats(): string
+    /**
+     * Calls $this->setHtml() and prints $this->html
+     */
+    public function siteStatsDemo(): void
     {
-        global $wpdb;
-        // Start output buffering so we can use printf() to format our output
-        $obLevel = ob_get_level(); // Checking the level will ensure that we call ob_end_clean() only for output buffering, and not any other output buffering that might be going on
-        ob_start();
+        $this->setHtml();
+        echo $this->html;
+    }
+
+    /**
+     * Returns javascript for site-stats plugin
+     */
+    public function echoJavascript(): string 
+    {
+        $js = '<script type="text/javascript">
+        const siteStats = {
+            toggleStats: (el, toggleElement) => {
+                if (siteStats.isVisible(el)) {
+                    siteStats.hideStats(el);
+                    toggleElement.innerHTML = "Show Site Stats Info";
+                    return;
+                }
+                toggleElement.innerHTML = "Hide Site Stats Info";
+                siteStats.showStats(el);
+            },
+            showStats: (el) => {
+                el.style.display = "block";
+            },
+            hideStats: (el) => {
+                el.style.display = "none";
+            },
+            isVisible: (el) => {
+                return (window.getComputedStyle(el).display === "block");
+            }
+        };
+
+        document.getElementById("site-stats-toggle").addEventListener("click", function(event) {
+            event.preventDefault();
+            siteStats.toggleStats(document.getElementById("site-stats-demo"), this);
+        });
+        </script>
+        ';
+        echo $js;
+    }
+
+    private function setHtml(): void
+    {
        
         // Initialize the return value, which will be an HTML list
-        $html = '<dl>';
+        $this->html = '<a href="" id="site-stats-toggle">Show Site Stats Info</a><div style="display:none;" id="site-stats-demo"><dl>';
 
-        // Get number of posts - total, published, draft
+        // Add post info to $this->html
+        $this->addPostInfo();
+
+        // Add user info to $this->html 
+        $this->addUserInfo();
+
+        // Add comment info to $this->html
+        $this->addCommentInfo();
+
+        // Add plugin information to $this->html
+        $this->addPluginInfo();
+
+        // Add theme info to $this->html 
+        $this->addThemeInfo();
+
+        // Add term info to $this->html 
+        $this->addTermInfo();
+
+        $this->html .=  '</dl></div>';
+
+    }   
+
+    /**
+     * Adds post info to $this->html
+     */
+    private function addPostInfo(): void
+    {
+        // Get post information
         // Use array_filter() because we only want categories with post count greater than 0
         $posts = array_filter((array) \wp_count_posts());
         if (!empty($posts)) {
-            echo '<dt>Posts:</dt>';
+            $this->html .= '<dt>Posts:</dt>';
             foreach ($posts as $postType => $count) {
                     if ($postType === 'publish') {
                         $postType = 'published'; // We want the output to say 'published' not 'publish
                     }
-                    echo '<dd>';
-                    printf( _n( "%s $postType post", "%s $postType posts", $count), number_format_i18n( $count ));
-                    echo '</dd>';
+                    $this->html .= '<dd>';
+                    $this->html .=sprintf( _n( "%s $postType post", "%s $postType posts", $count), number_format_i18n( $count ));
+                    $this->html .= '</dd>';
                 }
         } else {
-            echo '<dt>Posts: 0</dt>';
+            $this->html .= '<dt>Posts: 0</dt>';
         }
+    }
 
+    /**
+     * Adds user info to $this->html
+     */
+    private function addUserInfo(): void 
+    {
         // Get number of users
         $users = \count_users();
-        echo "<dt>Users ({$users['total_users']} total):</dt>";
+        $this->html .= "<dt>Users ({$users['total_users']} total):</dt>";
         foreach ($users as $key => $userInfo) {
             // Output detail for user types with count greater than 0
             if ($userInfo == 0) {
@@ -51,70 +131,85 @@ class SiteStats {
                     if ($count == 0) { 
                         continue;
                     }
-                    echo '<dd>';
-                    printf( _n( "%s $idx user", "%s $idx users", $count), number_format_i18n( $count ));
-                    echo '</dd>';
+                    $this->html .= '<dd>';
+                    $this->html .= sprintf( _n( "%s $idx user", "%s $idx users", $count), number_format_i18n( $count ));
+                    $this->html .= '</dd>';
                 }
             } else {
-                echo '<dd>';
-                printf( _n( "%s $key user", "%s $key users", $count), number_format_i18n( $userInfo ));
-                echo '</dd>';
+                $this->html .= '<dd>';
+                $this->html .= sprintf( _n( "%s $key user", "%s $key users", $count), number_format_i18n( $userInfo ));
+                $this->html .= '</dd>';
             }
         }
+    }
 
+    /**
+     * Adds comment info to $this->html
+     */
+    private function addCommentInfo(): void 
+    {
         // Get number of comments and detail
         $comments = (array) \wp_count_comments();
-        echo "<dt>Comments ({$comments['total_comments']} total):</dt>";
+        $this->html .= "<dt>Comments ({$comments['total_comments']} total):</dt>";
         $comments = array_filter($comments);    // We only want to output detail for comment types with count greater than 0
         if (!empty($comments)) {
             foreach ($comments as $commentType => $count) {
                     if (in_array($commentType, ['all','total_comments'])) {
                         continue; // We already output the total_comments, and we do not want to output 'all'
                     }
-                    echo '<dd>';
-                    printf( _n( "%s $commentType comment", "%s $commentType comments", $count), number_format_i18n( $count ));
-                    echo '</dd>';
+                    $this->html .= '<dd>';
+                    $this->html .= sprintf( _n( "%s $commentType comment", "%s $commentType comments", $count), number_format_i18n( $count ));
+                    $this->html .= '</dd>';
                 }
         }
+    }
 
+    /**
+     * Adds plugin info to $this->html
+     */
+    private function addPluginInfo(): void 
+    {
         // Get plugin detail
         $plugins = \get_plugins();
         $pluginCount = count($plugins);
-        echo '<dt>';
-        printf( _n( "%s plugin installed:", "%s plugins installed:", $pluginCount), number_format_i18n( $pluginCount ));
-        echo '</dt>';
+        $this->html .= '<dt>';
+        $this->html .= sprintf( _n( "%s plugin installed:", "%s plugins installed:", $pluginCount), number_format_i18n( $pluginCount ));
+        $this->html .= '</dt>';
         foreach ($plugins as $file => $pluginInfo) {
-            echo "<dd>{$pluginInfo['Name']}</dd>";
+            $this->html .= "<dd>{$pluginInfo['Name']}</dd>";
         }
+    }
 
+    /**
+     * Adds theme info to $this->html 
+     */
+    private function addThemeInfo(): void 
+    {
         // Get theme detail
         $themes = \wp_get_themes();
         $themeCount = count($themes);
-        echo '<dt>';
-        printf( _n( "%s theme installed:", "%s themes installed:", $themeCount), number_format_i18n( $themeCount ));
-        echo '</dt>';
+        $this->html .= '<dt>';
+        $this->html .= sprintf( _n( "%s theme installed:", "%s themes installed:", $themeCount), number_format_i18n( $themeCount ));
+        $this->html .= '</dt>';
         foreach ($themes as $theme => $wpThemeObject) {
-            echo "<dd>$theme</dd>";
+            $this->html .= "<dd>$theme</dd>";
         }
+    }
 
+    /**
+     * Adds term info to $this->html 
+     */
+    private function addTermInfo(): void 
+    {
         // Get information about wp_terms (just to demo using the $wpdb object)
-        $terms = $wpdb->get_results( "SELECT `name` FROM `wp_terms`" );
+        $terms = $this->wpdb->get_results( "SELECT `name` FROM `wp_terms`" );
         $termCount = count($terms);
-        echo '<dt>';
-        printf( _n( "%s term defined:", "%s terms defined:", $termCount), number_format_i18n( $termCount ));
-        echo '</dt>';
+        $this->html .= '<dt>';
+        $this->html .= sprintf( _n( "%s term:", "%s terms:", $termCount), number_format_i18n( $termCount ));
+        $this->html .= '</dt>';
         foreach ($terms as $row) {
-            echo "<dd>{$row->name}</dd>";
+            $this->html .= "<dd>{$row->name}</dd>";
         }
-
-        $html .= ob_get_contents() . '</dl>'; // Append the buffered output to the return value
-        while (ob_get_level() > $obLevel) {
-            ob_end_clean();
-        }
-
-        // Return the html string
-        return $html;
-    }   
-
+    }
 
 }
