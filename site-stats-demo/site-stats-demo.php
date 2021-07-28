@@ -18,9 +18,10 @@ Author: Bill Richards
 Author URI: https://github.com/billrichards
 License: GPLv2
 
+
 */
 require __DIR__ . '/SiteStats/SiteStats.php';
-
+global $wpdb;
 // instantiate the SiteStats object
 $siteStats = new \SiteStats\SiteStats($wpdb);
 
