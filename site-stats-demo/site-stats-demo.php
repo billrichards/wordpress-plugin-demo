@@ -16,7 +16,7 @@ Requires at least: 5.8
 Requires PHP:      7.3
 Author: Bill Richards
 Author URI: https://github.com/billrichards
-License: GPLv2 or later
+License: GPLv2
 
 */
 require __DIR__ . '/SiteStats/SiteStats.php';
@@ -25,7 +25,10 @@ require __DIR__ . '/SiteStats/SiteStats.php';
 $siteStats = new \SiteStats\SiteStats($wpdb);
 
 // Add the siteStatsDemo function to admin_notices
-add_action( 'admin_notices', [$siteStats, 'siteStatsDemo'] );
-add_action( 'admin_footer', [$siteStats, 'echoJavascript']);
+add_action( 'admin_notices', [$siteStats, 'siteStatsDemo'] );   
+
+// Enqueue the js that will show/hide site stats
+wp_enqueue_script('site-stats-demo', plugin_dir_url(__FILE__) . 'site-stats-demo.js');
+wp_enqueue_style('site-stats-demo', plugin_dir_url(__FILE__) . 'site-stats-demo.css');
 
 // For this plugin, there is no need to register any hooks for activation, deactivation, or uninstall

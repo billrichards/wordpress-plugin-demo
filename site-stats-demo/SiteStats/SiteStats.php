@@ -23,47 +23,11 @@ class SiteStats {
         echo $this->html;
     }
 
-    /**
-     * Returns javascript for site-stats plugin
-     */
-    public function echoJavascript(): string 
-    {
-        $js = '<script type="text/javascript">
-        const siteStats = {
-            toggleStats: (el, toggleElement) => {
-                if (siteStats.isVisible(el)) {
-                    siteStats.hideStats(el);
-                    toggleElement.innerHTML = "Show Site Stats Info";
-                    return;
-                }
-                toggleElement.innerHTML = "Hide Site Stats Info";
-                siteStats.showStats(el);
-            },
-            showStats: (el) => {
-                el.style.display = "block";
-            },
-            hideStats: (el) => {
-                el.style.display = "none";
-            },
-            isVisible: (el) => {
-                return (window.getComputedStyle(el).display === "block");
-            }
-        };
-
-        document.getElementById("site-stats-toggle").addEventListener("click", function(event) {
-            event.preventDefault();
-            siteStats.toggleStats(document.getElementById("site-stats-demo"), this);
-        });
-        </script>
-        ';
-        echo $js;
-    }
-
     private function setHtml(): void
     {
        
         // Initialize the return value, which will be an HTML list
-        $this->html = '<a href="" id="site-stats-toggle">Show Site Stats Info</a><div style="display:none;" id="site-stats-demo"><dl>';
+        $this->html = '<a href="" id="site-stats-toggle">Show Site Stats Info</a><div id="site-stats-demo"><dl>';
 
         // Add post info to $this->html
         $this->addPostInfo();
