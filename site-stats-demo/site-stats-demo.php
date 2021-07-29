@@ -18,15 +18,14 @@ Write a WordPress plugin that:
  */
 
 require __DIR__ . '/SiteStats/SiteStats.php';
+require __DIR__ . '/SiteStats/Housekeeping.php';
 global $wpdb;
-// instantiate the SiteStats object
-$siteStats = new \SiteStats\SiteStats($wpdb);
 
 // Add the siteStatsDemo function to admin_notices
-add_action( 'admin_notices', [$siteStats, 'siteStatsDemo'] );   
+add_action( 'admin_notices', [(new \SiteStats\SiteStats($wpdb)), 'siteStatsDemo'] );   
 
 // Enqueue the js that will show/hide site stats
 wp_enqueue_script('site-stats-demo', plugin_dir_url(__FILE__) . 'site-stats-demo.js');
 wp_enqueue_style('site-stats-demo', plugin_dir_url(__FILE__) . 'site-stats-demo.css');
 
-// For this plugin, there is no need to register any hooks for activation, deactivation, or uninstall
+register_activation_hook(__FILE__, function() { (new \SiteStats\Housekeeping())->preActivationCheck(__FILE__, $_REQUEST['plugin']);});
