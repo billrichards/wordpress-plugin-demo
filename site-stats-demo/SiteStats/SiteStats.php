@@ -26,7 +26,7 @@ class SiteStats {
     private function setHtml(): void
     {
        
-        // Initialize the return value, which will be an HTML list
+        // Initialize the html property, which will be an HTML list
         $this->html = '<a href="" id="site-stats-toggle">Show Site Stats Info</a><div id="site-stats-demo"><dl>';
 
         // Add post info to $this->html

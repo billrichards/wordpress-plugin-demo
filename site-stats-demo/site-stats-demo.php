@@ -17,9 +17,19 @@ Write a WordPress plugin that:
 (3) has some basic interaction with the WordPress database. 
  */
 
-require __DIR__ . '/SiteStats/SiteStats.php';
-require __DIR__ . '/SiteStats/Housekeeping.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'SiteStats' . DIRECTORY_SEPARATOR . 'SiteStats.php';
+require __DIR__ . DIRECTORY_SEPARATOR . 'SiteStats' . DIRECTORY_SEPARATOR . 'Housekeeping.php';
+
 global $wpdb;
+
+// Register activation and deactivation hooks
+$housekeeping = new \SiteStats\Housekeeping();
+register_activation_hook(__FILE__, function() use ($housekeeping) { 
+    $housekeeping->activationCheck(__FILE__, $_REQUEST['plugin']);
+});
+register_deactivation_hook(__FILE__, function() use ($housekeeping) { 
+    $housekeeping->deactivationCheck(__FILE__, $_REQUEST['plugin']);
+});
 
 // Add the siteStatsDemo function to admin_notices
 add_action( 'admin_notices', [(new \SiteStats\SiteStats($wpdb)), 'siteStatsDemo'] );   
@@ -27,5 +37,3 @@ add_action( 'admin_notices', [(new \SiteStats\SiteStats($wpdb)), 'siteStatsDemo'
 // Enqueue the js that will show/hide site stats
 wp_enqueue_script('site-stats-demo', plugin_dir_url(__FILE__) . 'site-stats-demo.js');
 wp_enqueue_style('site-stats-demo', plugin_dir_url(__FILE__) . 'site-stats-demo.css');
-
-register_activation_hook(__FILE__, function() { (new \SiteStats\Housekeeping())->preActivationCheck(__FILE__, $_REQUEST['plugin']);});
